@@ -1,6 +1,6 @@
 {
   "name": "@groundworx/components",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Reusable React components for Groundworx blocks and themes.",
   "author": "Johanne Courtright",
   "license": "MIT",
@@ -10,7 +10,9 @@
   },
   "type": "module",
   "sideEffects": false,
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "publishConfig": {
     "access": "public"
   },
@@ -43,5 +45,8 @@
     "@babel/cli": "^7.27.2",
     "@babel/core": "^7.27.1",
     "@wordpress/babel-preset-default": "^8.23.0"
+  },
+  "dependencies": {
+    "@groundworx/utils": "^1.0.2"
   }
 }
