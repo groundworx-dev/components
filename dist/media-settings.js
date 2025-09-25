@@ -2,7 +2,7 @@ import { __ } from '@wordpress/i18n';
 import { BlockControls, MediaReplaceFlow, MediaUpload, InspectorControls, MediaPlaceholder, __experimentalGetGradientClass as __experimentalUseGradient } from '@wordpress/block-editor';
 import { Button, FocalPointPicker, ToggleControl, __experimentalVStack as VStack, __experimentalHStack as HStack, __experimentalToolsPanel as ToolsPanel, __experimentalToolsPanelItem as ToolsPanelItem } from "@wordpress/components";
 import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
-export const MediaSettings = ({
+const MediaSettings = ({
   label,
   mediaAttributes,
   setMediaAttributes,
@@ -105,3 +105,4 @@ export const MediaSettings = ({
     })]
   });
 };
+export default MediaSettings;

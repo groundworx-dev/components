@@ -4,7 +4,7 @@ import { BlockControls, MediaReplaceFlow, MediaUpload, InspectorControls, MediaP
 
 import { Button, FocalPointPicker, ToggleControl, __experimentalVStack as VStack, __experimentalHStack as HStack, __experimentalToolsPanel as ToolsPanel, __experimentalToolsPanelItem as ToolsPanelItem } from "@wordpress/components";
 
-export const MediaSettings = ({ 
+const MediaSettings = ({ 
     label, 
     mediaAttributes, 
     setMediaAttributes, 
@@ -137,3 +137,5 @@ export const MediaSettings = ({
         </>
     );
 };
+
+export default MediaSettings;
