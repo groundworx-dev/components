@@ -11,7 +11,7 @@ import { isContentPositionCenter, getPositionClassName, mediaPosition } from '@g
 
 const MediaComponent = ({ mediaProps, autoPlay=false, controls=false, muted=true, loop=true, lazyLoad=false }) => {
     const { media, focalPoint, hasParallax, isRepeated } = mediaProps;
-    const { alt, mime_type, url } = media || {};
+    const { alt, mime_type, url, id } = media || {};
     
     const isImgElement = ! ( hasParallax || isRepeated );
     
@@ -45,10 +45,10 @@ const MediaComponent = ({ mediaProps, autoPlay=false, controls=false, muted=true
             mime_type === 'image' &&
             ( isImgElement ? (
                 <img
-                    className="image-object"
-                    alt={ alt }
-                    src={ url }
-                    style={ mediaStyle }
+                    className={clsx('image-object', id && `wp-image-${id}`)}
+                    alt={alt}
+                    src={url}
+                    style={mediaStyle}
                 />
             ) : (
                 <div

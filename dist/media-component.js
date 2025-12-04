@@ -24,7 +24,8 @@ const MediaComponent = ({
   const {
     alt,
     mime_type,
-    url
+    url,
+    id
   } = media || {};
   const isImgElement = !(hasParallax || isRepeated);
   const backgroundImage = url ? `url(${url})` : undefined;
@@ -48,7 +49,7 @@ const MediaComponent = ({
   }, getPositionClassName(focalPoint));
   return /*#__PURE__*/_jsxs(_Fragment, {
     children: [url && mime_type === 'image' && (isImgElement ? /*#__PURE__*/_jsx("img", {
-      className: "image-object",
+      className: clsx('image-object', id && `wp-image-${id}`),
       alt: alt,
       src: url,
       style: mediaStyle
