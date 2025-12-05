@@ -26,7 +26,8 @@ const MediaSettings = ({
 }) => {
     
     const isVideo = mediaAttributes?.media?.mime_type === 'video';
-    const hasMedia = !!mediaAttributes?.media?.url || useFeaturedImage;
+    const hasMedia = !!mediaAttributes?.media?.url;
+    const hasContent = hasMedia || useFeaturedImage;
     const displayURL = useFeaturedImage ? featuredImageURL : mediaAttributes?.media?.url;
 
     return (
@@ -39,13 +40,25 @@ const MediaSettings = ({
                     <ToolsPanelItem
                         label={__(`${label} Settings`)}
                         isShownByDefault={isShownByDefault}
-                        hasValue={() => hasMedia}
-                        onDeselect={clearMedia}
-                        resetAllFilter={clearMedia}
+                        hasValue={() => hasContent}
+                        onDeselect={() => {
+                            if (useFeaturedImage && onToggleFeaturedImage) {
+                                onToggleFeaturedImage();
+                            } else {
+                                clearMedia();
+                            }
+                        }}
+                        resetAllFilter={() => {
+                            if (useFeaturedImage && onToggleFeaturedImage) {
+                                onToggleFeaturedImage();
+                            } else {
+                                clearMedia();
+                            }
+                        }}
                         panelId={clientId}
                     >
                         
-                        {hasMedia ? (
+                        {hasContent ? (
                             
                             <VStack spacing={4}>
 
@@ -65,7 +78,7 @@ const MediaSettings = ({
                                     />
                                 )}
 
-                                {!mediaAttributes?.hasParallax && !mediaAttributes?.isRepeated && (
+                                {displayURL && !mediaAttributes?.hasParallax && !mediaAttributes?.isRepeated && (
                                     <FocalPointPicker
                                         label={__('Focal point')}
                                         autoPlay={false}
@@ -109,7 +122,7 @@ const MediaSettings = ({
                                         variant="secondary"
                                         onClick={onToggleFeaturedImage}
                                     >
-                                        {__( `Disable Featured Image` )}
+                                        {__( `Reset` )}
                                     </Button>
                                 )}
                             </VStack>
@@ -148,8 +161,8 @@ const MediaSettings = ({
                         onSelect={handleMediaSelect}
                         onError={ onError }
                         onToggleFeaturedImage={onToggleFeaturedImage}
-                        onRemove={() => setMediaAttributes({ mediaAttributes: { ...mediaAttributes, media: null } })}
-                        name={mediaAttributes?.media?.url ? __( `Replace ${label}` ) : __( `Add ${label}` )}
+                        onRemove={clearMedia}
+                        name={hasMedia ? __( `Replace ${label}` ) : __( `Add ${label}` )}
                     />
                 </BlockControls>
             )}

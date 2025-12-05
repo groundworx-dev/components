@@ -23,7 +23,8 @@ const MediaSettings = ({
   featuredImageURL
 }) => {
   const isVideo = mediaAttributes?.media?.mime_type === 'video';
-  const hasMedia = !!mediaAttributes?.media?.url || useFeaturedImage;
+  const hasMedia = !!mediaAttributes?.media?.url;
+  const hasContent = hasMedia || useFeaturedImage;
   const displayURL = useFeaturedImage ? featuredImageURL : mediaAttributes?.media?.url;
   return /*#__PURE__*/_jsxs(_Fragment, {
     children: [/*#__PURE__*/_jsx(InspectorControls, {
@@ -33,11 +34,23 @@ const MediaSettings = ({
         children: /*#__PURE__*/_jsx(ToolsPanelItem, {
           label: __(`${label} Settings`),
           isShownByDefault: isShownByDefault,
-          hasValue: () => hasMedia,
-          onDeselect: clearMedia,
-          resetAllFilter: clearMedia,
+          hasValue: () => hasContent,
+          onDeselect: () => {
+            if (useFeaturedImage && onToggleFeaturedImage) {
+              onToggleFeaturedImage();
+            } else {
+              clearMedia();
+            }
+          },
+          resetAllFilter: () => {
+            if (useFeaturedImage && onToggleFeaturedImage) {
+              onToggleFeaturedImage();
+            } else {
+              clearMedia();
+            }
+          },
           panelId: clientId,
-          children: hasMedia ? /*#__PURE__*/_jsxs(VStack, {
+          children: hasContent ? /*#__PURE__*/_jsxs(VStack, {
             spacing: 4,
             children: [!isVideo && !useFeaturedImage && /*#__PURE__*/_jsx(ToggleControl, {
               label: __('Fixed background'),
@@ -47,7 +60,7 @@ const MediaSettings = ({
               label: __('Repeated background'),
               checked: mediaAttributes?.isRepeated,
               onChange: () => toggleRepeat(mediaAttributes?.isRepeated)
-            }), !mediaAttributes?.hasParallax && !mediaAttributes?.isRepeated && /*#__PURE__*/_jsx(FocalPointPicker, {
+            }), displayURL && !mediaAttributes?.hasParallax && !mediaAttributes?.isRepeated && /*#__PURE__*/_jsx(FocalPointPicker, {
               label: __('Focal point'),
               autoPlay: false,
               url: displayURL,
@@ -76,7 +89,7 @@ const MediaSettings = ({
             }), useFeaturedImage && onToggleFeaturedImage && /*#__PURE__*/_jsx(Button, {
               variant: "secondary",
               onClick: onToggleFeaturedImage,
-              children: __(`Disable Featured Image`)
+              children: __(`Reset`)
             })]
           }) : /*#__PURE__*/_jsx(_Fragment, {
             children: displayElement && /*#__PURE__*/_jsx(MediaPlaceholder, {
@@ -105,13 +118,8 @@ const MediaSettings = ({
         onSelect: handleMediaSelect,
         onError: onError,
         onToggleFeaturedImage: onToggleFeaturedImage,
-        onRemove: () => setMediaAttributes({
-          mediaAttributes: {
-            ...mediaAttributes,
-            media: null
-          }
-        }),
-        name: mediaAttributes?.media?.url ? __(`Replace ${label}`) : __(`Add ${label}`)
+        onRemove: clearMedia,
+        name: hasMedia ? __(`Replace ${label}`) : __(`Add ${label}`)
       })
     })]
   });
