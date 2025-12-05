@@ -1,6 +1,6 @@
 import { __ } from '@wordpress/i18n';
 
-import { BlockControls, MediaReplaceFlow, MediaUpload, InspectorControls, MediaPlaceholder, __experimentalGetGradientClass as __experimentalUseGradient } from '@wordpress/block-editor';
+import { BlockControls, MediaReplaceFlow, MediaUpload, InspectorControls, MediaPlaceholder } from '@wordpress/block-editor';
 
 import { Button, FocalPointPicker, ToggleControl, __experimentalVStack as VStack, __experimentalHStack as HStack, __experimentalToolsPanel as ToolsPanel, __experimentalToolsPanelItem as ToolsPanelItem } from "@wordpress/components";
 
@@ -19,10 +19,15 @@ const MediaSettings = ({
     onError,
     multiple = false,
     displayElement = true,
-    clientId
+    clientId,
+    onToggleFeaturedImage,
+    useFeaturedImage,
+    featuredImageURL
 }) => {
     
     const isVideo = mediaAttributes?.media?.mime_type === 'video';
+    const hasMedia = !!mediaAttributes?.media?.url || useFeaturedImage;
+    const displayURL = useFeaturedImage ? featuredImageURL : mediaAttributes?.media?.url;
 
     return (
         <>
@@ -34,17 +39,17 @@ const MediaSettings = ({
                     <ToolsPanelItem
                         label={__(`${label} Settings`)}
                         isShownByDefault={isShownByDefault}
-                        hasValue={() => !!mediaAttributes?.media?.url}
+                        hasValue={() => hasMedia}
                         onDeselect={clearMedia}
                         resetAllFilter={clearMedia}
                         panelId={clientId}
                     >
                         
-                        {!!mediaAttributes?.media?.url ? (
+                        {hasMedia ? (
                             
                             <VStack spacing={4}>
 
-                                {!isVideo && (
+                                {!isVideo && !useFeaturedImage && (
                                     <ToggleControl
                                         label={__('Fixed background')}
                                         checked={mediaAttributes?.hasParallax}
@@ -52,7 +57,7 @@ const MediaSettings = ({
                                     />
                                 )}
 
-                                {!isVideo && (
+                                {!isVideo && !useFeaturedImage && (
                                     <ToggleControl
                                         label={__('Repeated background')}
                                         checked={mediaAttributes?.isRepeated}
@@ -64,37 +69,49 @@ const MediaSettings = ({
                                     <FocalPointPicker
                                         label={__('Focal point')}
                                         autoPlay={false}
-                                        url={mediaAttributes?.media?.url}
+                                        url={displayURL}
                                         value={mediaAttributes?.focalPoint}
                                         onChange={handleFocalPointChange}
                                         __nextHasNoMarginBottom
                                     />
                                 )}
-                                <HStack spacing={4}>
-                                    
-                                    <MediaUpload
-                                        onSelect={handleMediaSelect}
-                                        allowedTypes={allowedTypes}
-                                        render={({ open }) => (
-                                            <Button
-                                                variant="secondary"
-                                                onClick={open}
-                                            >
-                                                {__( `Replace` )}
-                                            </Button>
-                                        )}
-                                        onError={ onError }
-                                    />
-                                    
-                                    <Button
-                                        isDestructive
-                                        variant="secondary"
-                                        onClick={clearMedia}
-                                    >
-                                        {__( `Remove` )}
-                                    </Button>
 
-                                </HStack>
+                                {!useFeaturedImage && (
+                                    <HStack spacing={4}>
+                                        
+                                        <MediaUpload
+                                            onSelect={handleMediaSelect}
+                                            allowedTypes={allowedTypes}
+                                            render={({ open }) => (
+                                                <Button
+                                                    variant="secondary"
+                                                    onClick={open}
+                                                >
+                                                    {__( `Replace` )}
+                                                </Button>
+                                            )}
+                                            onError={ onError }
+                                        />
+                                        
+                                        <Button
+                                            isDestructive
+                                            variant="secondary"
+                                            onClick={clearMedia}
+                                        >
+                                            {__( `Remove` )}
+                                        </Button>
+
+                                    </HStack>
+                                )}
+
+                                {useFeaturedImage && onToggleFeaturedImage && (
+                                    <Button
+                                        variant="secondary"
+                                        onClick={onToggleFeaturedImage}
+                                    >
+                                        {__( `Disable Featured Image` )}
+                                    </Button>
+                                )}
                             </VStack>
                         
                         ) : (
@@ -106,8 +123,8 @@ const MediaSettings = ({
                                     title: `${label}`,
                                     instructions: __('Upload an image or video for the media.', 'groundworx'),
                                 }}
-                                
                                 onSelect={handleMediaSelect}
+                                onToggleFeaturedImage={onToggleFeaturedImage}
                                 accept={accept}
                                 allowedTypes={allowedTypes}
                                 multiple={multiple}
@@ -121,18 +138,21 @@ const MediaSettings = ({
                 </ToolsPanel>
             </InspectorControls>
 
-            <BlockControls group="other">
-                <MediaReplaceFlow
-                    mediaId={mediaAttributes?.media?.id}
-                    mediaURL={mediaAttributes?.media?.url}
-                    allowedTypes={allowedTypes}
-                    accept={accept}
-                    onSelect={handleMediaSelect}
-                    onError={ onError }
-                    onRemove={() => setMediaAttributes({ mediaAttributes: { ...mediaAttributes, media: null } })}
-                    name={mediaAttributes?.media?.url ? __( `Replace ${label}` ) : __( `Add ${label}` )}
-                />
-            </BlockControls>
+            {!useFeaturedImage && (
+                <BlockControls group="other">
+                    <MediaReplaceFlow
+                        mediaId={mediaAttributes?.media?.id}
+                        mediaURL={mediaAttributes?.media?.url}
+                        allowedTypes={allowedTypes}
+                        accept={accept}
+                        onSelect={handleMediaSelect}
+                        onError={ onError }
+                        onToggleFeaturedImage={onToggleFeaturedImage}
+                        onRemove={() => setMediaAttributes({ mediaAttributes: { ...mediaAttributes, media: null } })}
+                        name={mediaAttributes?.media?.url ? __( `Replace ${label}` ) : __( `Add ${label}` )}
+                    />
+                </BlockControls>
+            )}
         
         </>
     );

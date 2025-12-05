@@ -1,6 +1,6 @@
 {
   "name": "@groundworx/components",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Reusable React components for Groundworx blocks and themes.",
   "author": "Johanne Courtright",
   "license": "MIT",

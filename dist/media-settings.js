@@ -1,5 +1,5 @@
 import { __ } from '@wordpress/i18n';
-import { BlockControls, MediaReplaceFlow, MediaUpload, InspectorControls, MediaPlaceholder, __experimentalGetGradientClass as __experimentalUseGradient } from '@wordpress/block-editor';
+import { BlockControls, MediaReplaceFlow, MediaUpload, InspectorControls, MediaPlaceholder } from '@wordpress/block-editor';
 import { Button, FocalPointPicker, ToggleControl, __experimentalVStack as VStack, __experimentalHStack as HStack, __experimentalToolsPanel as ToolsPanel, __experimentalToolsPanelItem as ToolsPanelItem } from "@wordpress/components";
 import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
 const MediaSettings = ({
@@ -17,9 +17,14 @@ const MediaSettings = ({
   onError,
   multiple = false,
   displayElement = true,
-  clientId
+  clientId,
+  onToggleFeaturedImage,
+  useFeaturedImage,
+  featuredImageURL
 }) => {
   const isVideo = mediaAttributes?.media?.mime_type === 'video';
+  const hasMedia = !!mediaAttributes?.media?.url || useFeaturedImage;
+  const displayURL = useFeaturedImage ? featuredImageURL : mediaAttributes?.media?.url;
   return /*#__PURE__*/_jsxs(_Fragment, {
     children: [/*#__PURE__*/_jsx(InspectorControls, {
       children: /*#__PURE__*/_jsx(ToolsPanel, {
@@ -28,28 +33,28 @@ const MediaSettings = ({
         children: /*#__PURE__*/_jsx(ToolsPanelItem, {
           label: __(`${label} Settings`),
           isShownByDefault: isShownByDefault,
-          hasValue: () => !!mediaAttributes?.media?.url,
+          hasValue: () => hasMedia,
           onDeselect: clearMedia,
           resetAllFilter: clearMedia,
           panelId: clientId,
-          children: !!mediaAttributes?.media?.url ? /*#__PURE__*/_jsxs(VStack, {
+          children: hasMedia ? /*#__PURE__*/_jsxs(VStack, {
             spacing: 4,
-            children: [!isVideo && /*#__PURE__*/_jsx(ToggleControl, {
+            children: [!isVideo && !useFeaturedImage && /*#__PURE__*/_jsx(ToggleControl, {
               label: __('Fixed background'),
               checked: mediaAttributes?.hasParallax,
               onChange: () => toggleParallax(mediaAttributes?.hasParallax)
-            }), !isVideo && /*#__PURE__*/_jsx(ToggleControl, {
+            }), !isVideo && !useFeaturedImage && /*#__PURE__*/_jsx(ToggleControl, {
               label: __('Repeated background'),
               checked: mediaAttributes?.isRepeated,
               onChange: () => toggleRepeat(mediaAttributes?.isRepeated)
             }), !mediaAttributes?.hasParallax && !mediaAttributes?.isRepeated && /*#__PURE__*/_jsx(FocalPointPicker, {
               label: __('Focal point'),
               autoPlay: false,
-              url: mediaAttributes?.media?.url,
+              url: displayURL,
               value: mediaAttributes?.focalPoint,
               onChange: handleFocalPointChange,
               __nextHasNoMarginBottom: true
-            }), /*#__PURE__*/_jsxs(HStack, {
+            }), !useFeaturedImage && /*#__PURE__*/_jsxs(HStack, {
               spacing: 4,
               children: [/*#__PURE__*/_jsx(MediaUpload, {
                 onSelect: handleMediaSelect,
@@ -68,6 +73,10 @@ const MediaSettings = ({
                 onClick: clearMedia,
                 children: __(`Remove`)
               })]
+            }), useFeaturedImage && onToggleFeaturedImage && /*#__PURE__*/_jsx(Button, {
+              variant: "secondary",
+              onClick: onToggleFeaturedImage,
+              children: __(`Disable Featured Image`)
             })]
           }) : /*#__PURE__*/_jsx(_Fragment, {
             children: displayElement && /*#__PURE__*/_jsx(MediaPlaceholder, {
@@ -77,6 +86,7 @@ const MediaSettings = ({
                 instructions: __('Upload an image or video for the media.', 'groundworx')
               },
               onSelect: handleMediaSelect,
+              onToggleFeaturedImage: onToggleFeaturedImage,
               accept: accept,
               allowedTypes: allowedTypes,
               multiple: multiple,
@@ -85,7 +95,7 @@ const MediaSettings = ({
           })
         })
       })
-    }), /*#__PURE__*/_jsx(BlockControls, {
+    }), !useFeaturedImage && /*#__PURE__*/_jsx(BlockControls, {
       group: "other",
       children: /*#__PURE__*/_jsx(MediaReplaceFlow, {
         mediaId: mediaAttributes?.media?.id,
@@ -94,6 +104,7 @@ const MediaSettings = ({
         accept: accept,
         onSelect: handleMediaSelect,
         onError: onError,
+        onToggleFeaturedImage: onToggleFeaturedImage,
         onRemove: () => setMediaAttributes({
           mediaAttributes: {
             ...mediaAttributes,
