@@ -2,17 +2,17 @@ import { __ } from '@wordpress/i18n';
 
 import { BlockControls, MediaReplaceFlow, MediaUpload, InspectorControls, MediaPlaceholder } from '@wordpress/block-editor';
 
-import { Button, FocalPointPicker, ToggleControl, __experimentalVStack as VStack, __experimentalHStack as HStack, __experimentalToolsPanel as ToolsPanel, __experimentalToolsPanelItem as ToolsPanelItem } from "@wordpress/components";
+import { Button, FocalPointPicker, ToggleControl, SelectControl, __experimentalVStack as VStack, __experimentalHStack as HStack, __experimentalToolsPanel as ToolsPanel, __experimentalToolsPanelItem as ToolsPanelItem } from "@wordpress/components";
 
-const MediaSettings = ({ 
-    label, 
-    mediaAttributes, 
-    setMediaAttributes, 
-    clearMedia, 
-    toggleParallax, 
-    toggleRepeat, 
-    handleMediaSelect, 
-    handleFocalPointChange, 
+const MediaSettings = ({
+    label,
+    mediaAttributes,
+    setMediaAttributes,
+    clearMedia,
+    toggleParallax,
+    toggleRepeat,
+    handleMediaSelect,
+    handleFocalPointChange,
     isShownByDefault = false,
     accept,
     allowedTypes,
@@ -22,9 +22,12 @@ const MediaSettings = ({
     clientId,
     onToggleFeaturedImage,
     useFeaturedImage,
-    featuredImageURL
+    featuredImageURL,
+    imageSizeOptions,
+    sizeSlug,
+    onSizeChange
 }) => {
-    
+
     const isVideo = mediaAttributes?.media?.mime_type === 'video';
     const hasMedia = !!mediaAttributes?.media?.url;
     const hasContent = hasMedia || useFeaturedImage;
@@ -33,7 +36,7 @@ const MediaSettings = ({
     return (
         <>
             <InspectorControls>
-                <ToolsPanel 
+                <ToolsPanel
                     label={label}
                     panelId={clientId}
                 >
@@ -57,12 +60,12 @@ const MediaSettings = ({
                         }}
                         panelId={clientId}
                     >
-                        
+
                         {hasContent ? (
-                            
+
                             <VStack spacing={4}>
 
-                                {!isVideo && !useFeaturedImage && (
+                                {!isVideo && (
                                     <ToggleControl
                                         label={__('Fixed background')}
                                         checked={mediaAttributes?.hasParallax}
@@ -70,7 +73,7 @@ const MediaSettings = ({
                                     />
                                 )}
 
-                                {!isVideo && !useFeaturedImage && (
+                                {!isVideo && (
                                     <ToggleControl
                                         label={__('Repeated background')}
                                         checked={mediaAttributes?.isRepeated}
@@ -89,9 +92,20 @@ const MediaSettings = ({
                                     />
                                 )}
 
+                                {!isVideo && !!imageSizeOptions?.length && (
+                                    <SelectControl
+                                        __nextHasNoMarginBottom
+                                        label={__('Resolution')}
+                                        value={sizeSlug || 'full'}
+                                        options={imageSizeOptions}
+                                        onChange={onSizeChange}
+                                        help={__('Select the size of the source image.')}
+                                    />
+                                )}
+
                                 {!useFeaturedImage && (
                                     <HStack spacing={4}>
-                                        
+
                                         <MediaUpload
                                             onSelect={handleMediaSelect}
                                             allowedTypes={allowedTypes}
@@ -105,7 +119,7 @@ const MediaSettings = ({
                                             )}
                                             onError={ onError }
                                         />
-                                        
+
                                         <Button
                                             isDestructive
                                             variant="secondary"
@@ -116,17 +130,8 @@ const MediaSettings = ({
 
                                     </HStack>
                                 )}
-
-                                {useFeaturedImage && onToggleFeaturedImage && (
-                                    <Button
-                                        variant="secondary"
-                                        onClick={onToggleFeaturedImage}
-                                    >
-                                        {__( `Reset` )}
-                                    </Button>
-                                )}
                             </VStack>
-                        
+
                         ) : (
                             <>
                             {displayElement && (
@@ -151,22 +156,22 @@ const MediaSettings = ({
                 </ToolsPanel>
             </InspectorControls>
 
-            {!useFeaturedImage && (
-                <BlockControls group="other">
-                    <MediaReplaceFlow
-                        mediaId={mediaAttributes?.media?.id}
-                        mediaURL={mediaAttributes?.media?.url}
-                        allowedTypes={allowedTypes}
-                        accept={accept}
-                        onSelect={handleMediaSelect}
-                        onError={ onError }
-                        onToggleFeaturedImage={onToggleFeaturedImage}
-                        onRemove={clearMedia}
-                        name={hasMedia ? __( `Replace ${label}` ) : __( `Add ${label}` )}
-                    />
-                </BlockControls>
-            )}
-        
+            <BlockControls group="other">
+                <MediaReplaceFlow
+                    mediaId={useFeaturedImage ? undefined : mediaAttributes?.media?.id}
+                    mediaURL={useFeaturedImage ? featuredImageURL : mediaAttributes?.media?.url}
+                    allowedTypes={allowedTypes}
+                    accept={accept}
+                    onSelect={handleMediaSelect}
+                    onError={ onError }
+                    onToggleFeaturedImage={onToggleFeaturedImage}
+                    useFeaturedImage={useFeaturedImage}
+                    onReset={useFeaturedImage ? onToggleFeaturedImage : (hasMedia ? clearMedia : undefined)}
+                    onRemove={useFeaturedImage ? undefined : clearMedia}
+                    name={useFeaturedImage ? label : (hasMedia ? __( `Replace ${label}` ) : __( `Add ${label}` ))}
+                />
+            </BlockControls>
+
         </>
     );
 };

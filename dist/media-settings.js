@@ -1,6 +1,6 @@
 import { __ } from '@wordpress/i18n';
 import { BlockControls, MediaReplaceFlow, MediaUpload, InspectorControls, MediaPlaceholder } from '@wordpress/block-editor';
-import { Button, FocalPointPicker, ToggleControl, __experimentalVStack as VStack, __experimentalHStack as HStack, __experimentalToolsPanel as ToolsPanel, __experimentalToolsPanelItem as ToolsPanelItem } from "@wordpress/components";
+import { Button, FocalPointPicker, ToggleControl, SelectControl, __experimentalVStack as VStack, __experimentalHStack as HStack, __experimentalToolsPanel as ToolsPanel, __experimentalToolsPanelItem as ToolsPanelItem } from "@wordpress/components";
 import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
 const MediaSettings = ({
   label,
@@ -20,7 +20,10 @@ const MediaSettings = ({
   clientId,
   onToggleFeaturedImage,
   useFeaturedImage,
-  featuredImageURL
+  featuredImageURL,
+  imageSizeOptions,
+  sizeSlug,
+  onSizeChange
 }) => {
   const isVideo = mediaAttributes?.media?.mime_type === 'video';
   const hasMedia = !!mediaAttributes?.media?.url;
@@ -52,11 +55,11 @@ const MediaSettings = ({
           panelId: clientId,
           children: hasContent ? /*#__PURE__*/_jsxs(VStack, {
             spacing: 4,
-            children: [!isVideo && !useFeaturedImage && /*#__PURE__*/_jsx(ToggleControl, {
+            children: [!isVideo && /*#__PURE__*/_jsx(ToggleControl, {
               label: __('Fixed background'),
               checked: mediaAttributes?.hasParallax,
               onChange: () => toggleParallax(mediaAttributes?.hasParallax)
-            }), !isVideo && !useFeaturedImage && /*#__PURE__*/_jsx(ToggleControl, {
+            }), !isVideo && /*#__PURE__*/_jsx(ToggleControl, {
               label: __('Repeated background'),
               checked: mediaAttributes?.isRepeated,
               onChange: () => toggleRepeat(mediaAttributes?.isRepeated)
@@ -67,6 +70,13 @@ const MediaSettings = ({
               value: mediaAttributes?.focalPoint,
               onChange: handleFocalPointChange,
               __nextHasNoMarginBottom: true
+            }), !isVideo && !!imageSizeOptions?.length && /*#__PURE__*/_jsx(SelectControl, {
+              __nextHasNoMarginBottom: true,
+              label: __('Resolution'),
+              value: sizeSlug || 'full',
+              options: imageSizeOptions,
+              onChange: onSizeChange,
+              help: __('Select the size of the source image.')
             }), !useFeaturedImage && /*#__PURE__*/_jsxs(HStack, {
               spacing: 4,
               children: [/*#__PURE__*/_jsx(MediaUpload, {
@@ -86,10 +96,6 @@ const MediaSettings = ({
                 onClick: clearMedia,
                 children: __(`Remove`)
               })]
-            }), useFeaturedImage && onToggleFeaturedImage && /*#__PURE__*/_jsx(Button, {
-              variant: "secondary",
-              onClick: onToggleFeaturedImage,
-              children: __(`Reset`)
             })]
           }) : /*#__PURE__*/_jsx(_Fragment, {
             children: displayElement && /*#__PURE__*/_jsx(MediaPlaceholder, {
@@ -108,18 +114,20 @@ const MediaSettings = ({
           })
         })
       })
-    }), !useFeaturedImage && /*#__PURE__*/_jsx(BlockControls, {
+    }), /*#__PURE__*/_jsx(BlockControls, {
       group: "other",
       children: /*#__PURE__*/_jsx(MediaReplaceFlow, {
-        mediaId: mediaAttributes?.media?.id,
-        mediaURL: mediaAttributes?.media?.url,
+        mediaId: useFeaturedImage ? undefined : mediaAttributes?.media?.id,
+        mediaURL: useFeaturedImage ? featuredImageURL : mediaAttributes?.media?.url,
         allowedTypes: allowedTypes,
         accept: accept,
         onSelect: handleMediaSelect,
         onError: onError,
         onToggleFeaturedImage: onToggleFeaturedImage,
-        onRemove: clearMedia,
-        name: hasMedia ? __(`Replace ${label}`) : __(`Add ${label}`)
+        useFeaturedImage: useFeaturedImage,
+        onReset: useFeaturedImage ? onToggleFeaturedImage : hasMedia ? clearMedia : undefined,
+        onRemove: useFeaturedImage ? undefined : clearMedia,
+        name: useFeaturedImage ? label : hasMedia ? __(`Replace ${label}`) : __(`Add ${label}`)
       })
     })]
   });
